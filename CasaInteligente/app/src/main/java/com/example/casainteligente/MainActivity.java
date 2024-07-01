@@ -1,6 +1,9 @@
 package com.example.casainteligente;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +12,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
+
+    public Button LedAzul, LedVermelho, LedVerde, LED;
+    public TextView valorBrilho, valorLDR;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,5 +26,22 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+
+        LedAzul = findViewById(R.id.ledBlue);
+        LedVerde = findViewById(R.id.ledGreen);
+        LedVermelho = findViewById(R.id.ledRed);
+        LED = findViewById(R.id.ledFlash);
+
+        valorBrilho = findViewById(R.id.text_ValorBrilhoLED);
+        valorLDR = findViewById(R.id.text_ValorLDR);
+
+        valorLDR.setVisibility(View.INVISIBLE);
+        valorBrilho.setVisibility(View.INVISIBLE);
+
+
+
+
+
     }
 }
