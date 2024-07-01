@@ -1,5 +1,14 @@
 #include "BluetoothSerial.h"
 
+#define led 23
+#define ldr 15
+#define blue 5
+#define green 18
+#define red 19
+
+int lumens = 0, brilhoLED = 0;
+bool ativoLED = false;
+
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
@@ -7,18 +16,39 @@
 BluetoothSerial SerialBT;
 
 void setup() {
-  pinMode(15, OUTPUT);
-  pinMode(2, OUTPUT);
-  pinMode(4, OUTPUT);
+  pinMode(ldr, INPUT);     // LDR
+  pinMode(led, OUTPUT);    // LED PWM
+  pinMode(blue, OUTPUT);   // LED AZUL
+  pinMode(red, OUTPUT);    // LED VERMELHO
+  pinMode(green, OUTPUT);  // LED VERDE
+
+
+  digitalWrite(blue, LOW);
+  digitalWrite(red, LOW);
+  digitalWrite(green, LOW);
+  analogWrite(led, 0);
 
   Serial.begin(115200);
-  SerialBT.begin("Casa Inteligente"); //Bluetooth device name
+  SerialBT.begin("Casa Inteligente");  //Bluetooth device name
   Serial.println("The device started, now you can pair it with bluetooth!");
 }
 
 void loop() {
 
-/// PROGRAMA
+
+  /// LDR
+  lumens = analogRead(ldr);
+
+  /// LED PWM
+  brilhoLED = map(lumens, 0, 4195, 255, 0);
+
+
+  if (ativoLED) {
+    analogWrite(led, brilhoLED);
+  }else {
+    analogWrite(led, 0);
+  }
+
 
   if (SerialBT.available()) {
     char comandoRecebido = SerialBT.read();
@@ -26,36 +56,49 @@ void loop() {
 
     Serial.print("COMANDO RECEBIDO: ");
     Serial.println(comandoRecebido);
-    
 
-    switch(comandoRecebido){
+
+    switch (comandoRecebido) {
       case 'B':
-        digitalWrite(2, HIGH);
-        digitalWrite(4, LOW);
-        digitalWrite(15, LOW);
-        delay(100);
-
-        break;
-      case 'G':
-        digitalWrite(2, LOW);
-        digitalWrite(4, HIGH);
-        digitalWrite(15, LOW);
+        digitalWrite(blue, HIGH);
+        digitalWrite(red, LOW);
+        digitalWrite(green, LOW);
         delay(100);
 
         break;
       case 'R':
-        digitalWrite(2, LOW);
-        digitalWrite(4, LOW);
-        digitalWrite(15, HIGH);
-        delay(100);      
+        digitalWrite(blue, LOW);
+        digitalWrite(red, HIGH);
+        digitalWrite(green, LOW);
+        delay(100);
+
         break;
-      case 'C':
-        digitalWrite(2, LOW);
-        digitalWrite(4, LOW);
-        digitalWrite(15, HIGH);
-        delay(100);      
+      case 'G':
+        digitalWrite(blue, LOW);
+        digitalWrite(red, LOW);
+        digitalWrite(green, HIGH);
+        delay(100);
         break;
-    } 
+      case 'O':
+        digitalWrite(blue, LOW);
+        digitalWrite(red, LOW);
+        digitalWrite(green, LOW);
+        delay(100);
+        break;
+      case 'L':
+        ativoLED = !ativoLED;
+    }
   }
 
+
+
+
+  ///  CONTROLE E TESTAGEM
+  Serial.print("LED: ");
+  Serial.print(ativoLED);
+  Serial.print(" Lumens: ");
+  Serial.print(lumens);
+  Serial.print(" Brilho LED: ");
+  Serial.println(brilhoLED);
+  delay(100);
 }
