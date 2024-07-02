@@ -64,18 +64,12 @@ void loop() {
     analogWrite(led, 0);
   }
 
-
-  
- 
-
   if (SerialBT.available()) {
     char comandoRecebido = SerialBT.read();
     delay(50);
-
     Serial.print("COMANDO RECEBIDO: ");
     Serial.println(comandoRecebido);
 
- 
 
     switch (comandoRecebido) {
       case 'B':
@@ -115,15 +109,4 @@ void loop() {
     }
   }
 
-
-
-
-  ///  CONTROLE E TESTAGEM
-  Serial.print("LED: ");
-  Serial.print(ativoLED);
-  Serial.print(" Lumens: ");
-  Serial.print(lumens);
-  Serial.print(" Brilho LED: ");
-  Serial.println(brilhoLED);
-  delay(100);
 }
