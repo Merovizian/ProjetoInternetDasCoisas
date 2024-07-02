@@ -66,7 +66,6 @@ public class ListaDispositivos extends ListActivity {
 
         String informacaoGeral = ((TextView) v).getText().toString();
         String enderecoMAC = informacaoGeral.substring(informacaoGeral.length()-17);
-        Toast.makeText(this, enderecoMAC, Toast.LENGTH_SHORT).show();
 
         Intent retornarMAC = new Intent();
         retornarMAC.putExtra(ENDERECO_MAC, enderecoMAC);

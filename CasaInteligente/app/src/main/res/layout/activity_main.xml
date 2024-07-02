@@ -13,7 +13,7 @@
         android:layout_height="83dp"
         android:layout_marginTop="32dp"
         android:layout_marginBottom="24dp"
-        android:backgroundTint="#4D15D31B"
+        android:backgroundTint="#15D31B"
         android:text="Led Verde"
         app:layout_constraintBottom_toTopOf="@+id/ledRed"
         app:layout_constraintEnd_toEndOf="parent"
@@ -21,15 +21,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        app:layout_constraintVertical_chainStyle="packed"
-        />
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <Button
         android:id="@+id/ledRed"
         android:layout_width="148dp"
         android:layout_height="83dp"
         android:layout_marginBottom="24dp"
-        android:backgroundTint="#4DC70808"
+        android:backgroundTint="#C70808"
         android:text="Led Vermelho"
         app:layout_constraintBottom_toTopOf="@+id/ledBlue"
         app:layout_constraintEnd_toEndOf="parent"
@@ -41,7 +40,7 @@
         android:id="@+id/ledBlue"
         android:layout_width="148dp"
         android:layout_height="83dp"
-        android:backgroundTint="#4D000CFF"
+        android:backgroundTint="#000CFF"
         android:text="Led Azul"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
