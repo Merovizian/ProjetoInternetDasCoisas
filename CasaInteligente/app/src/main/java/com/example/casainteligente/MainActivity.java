@@ -1,5 +1,6 @@
 package com.example.casainteligente;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 
@@ -8,7 +9,6 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -34,16 +35,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Handler;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    public static int ATIVA_BLUETOOTH = 1;
     private static final int SOLICITA_ATIVACAO = 1;
     private static final int SOLICITA_CONEXAO = 2;
+    private static final int MESSAGE_READ = 3;
 
 
     ConnectedThread connectedThread;
+    Handler mhandler;
+    StringBuilder dadosBluetooth = new StringBuilder();
 
     public Button LedAzul, LedVermelho, LedVerde, LED;
     boolean azul = false, vermelho = false, verde = false, amarelo = false;
@@ -60,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private static String MAC = null;
 
 
+    @SuppressLint("HandlerLeak")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
-            startActivityForResult(ativaBluetooth, ATIVA_BLUETOOTH);
 
         }
 
@@ -200,6 +204,46 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+/*
+        mhandler = new Handler(){
+            @SuppressLint("HandlerLeak")
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                if (msg.what == MESSAGE_READ){
+
+                    String recebidas = (String) msg.obj;
+
+                    dadosBluetooth.append(recebidas);
+
+                    int fimInformacao = dadosBluetooth.indexOf("}");
+
+                    if (fimInformacao >0 ){
+
+                        String dadosCompletos = dadosBluetooth.substring(0, fimInformacao);
+
+                        int tamInformacao = dadosCompletos.length();
+
+                        if (dadosBluetooth.charAt(0) == '{'){
+
+                            String dadosFinais = dadosBluetooth.substring(1, tamInformacao);
+
+                            Toast.makeText(MainActivity.this, dadosFinais, Toast.LENGTH_SHORT).show();
+
+                        }
+                        dadosBluetooth.delete(0, dadosBluetooth.length());
+
+                    }
+
+
+
+                }
+
+
+
+            }
+        };
+
+ */
 
 
 
@@ -232,8 +276,9 @@ public class MainActivity extends AppCompatActivity {
 
                     meuDeviceBT = meuBluetoothAdapter.getRemoteDevice(MAC);
 
+
                     try {
-                        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                        if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                             // TODO: Consider calling
                             //    ActivityCompat#requestPermissions
                             // here to request the missing permissions, and then overriding
@@ -250,20 +295,17 @@ public class MainActivity extends AppCompatActivity {
                         conexao = true;
 
                         connectedThread = new ConnectedThread(meusocketBT);
+
                         connectedThread.start();
 
 
-
-
-                        Toast.makeText(this, "CONECTADO", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "CONECTADO", Toast.LENGTH_SHORT).show();
                         bluetoothIcon.setImageResource(R.drawable.ic_bluetooth_foreground);
 
 
-                    } catch (IOException erro){
-                        Toast.makeText(this, erro.getMessage(), Toast.LENGTH_SHORT).show();
+                    } catch (IOException erro) {
+                        Toast.makeText(MainActivity.this, erro.getMessage(), Toast.LENGTH_SHORT).show();
                     }
-
-
 
 
 
@@ -305,6 +347,9 @@ public class MainActivity extends AppCompatActivity {
                 mmOutStream = tmpOut;
             }
 
+
+
+
             public void run() {
                 mmBuffer = new byte[1024];
                 int numBytes; // bytes returned from read()
@@ -314,14 +359,24 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         // Read from the InputStream.
                         numBytes = mmInStream.read(mmBuffer);
-                        // Send the obtained bytes to the UI activity.
 
+                        // Convert the bytes to a string.
+                        String readMessage = new String(mmBuffer, 0, numBytes);
+
+                        // Send the obtained bytes to the UI activity.
+                        Message readMsg = mhandler.obtainMessage(
+                                MESSAGE_READ, numBytes, -1, readMessage);
+                        readMsg.sendToTarget();
                     } catch (IOException e) {
-                        Log.d("ERICTAG", "Input stream was disconnected", e);
+                        Log.d("ERICTAG", "Input stream was disconnected");
                         break;
                     }
                 }
             }
+
+
+
+
 
             // Call this from the main activity to send data to the remote device.
             public void enviar(String dadosEnviar) {

@@ -6,6 +6,11 @@
 #define green 18
 #define red 19
 
+
+unsigned long previousMillis = 0; 
+const long interval = 5000;        
+
+
 int lumens = 0, brilhoLED = 0;
 bool ativoLED = false;
 
@@ -34,59 +39,79 @@ void setup() {
 }
 
 void loop() {
+  unsigned long currentMillis = millis();
 
 
   /// LDR
   lumens = analogRead(ldr);
 
   /// LED PWM
-  brilhoLED = map(lumens, 0, 4195, 255, 0);
+  brilhoLED = map(lumens, 200, 1650, 254, 0);
+  if (brilhoLED < 60) brilhoLED = 0;
+  if (brilhoLED > 200) brilhoLED = 255;
 
-
-  if (ativoLED) {
+  if(ativoLED){
     analogWrite(led, brilhoLED);
-  }else {
+    String envio = "{" + String(lumens) + "}";
+
+    if (currentMillis - previousMillis >= interval){
+      previousMillis = currentMillis;
+      SerialBT.println(envio);
+    }
+
+
+  }else{
     analogWrite(led, 0);
   }
 
 
+  
+ 
+
   if (SerialBT.available()) {
     char comandoRecebido = SerialBT.read();
-    delay(10);
+    delay(50);
 
     Serial.print("COMANDO RECEBIDO: ");
     Serial.println(comandoRecebido);
 
+ 
 
     switch (comandoRecebido) {
       case 'B':
         digitalWrite(blue, HIGH);
-        digitalWrite(red, LOW);
-        digitalWrite(green, LOW);
-        delay(100);
-
         break;
+      case 'b':
+        digitalWrite(blue, LOW);
+        break;
+
       case 'R':
-        digitalWrite(blue, LOW);
         digitalWrite(red, HIGH);
-        digitalWrite(green, LOW);
-        delay(100);
-
         break;
-      case 'G':
-        digitalWrite(blue, LOW);
+      case 'r':
         digitalWrite(red, LOW);
-        digitalWrite(green, HIGH);
-        delay(100);
         break;
+
+      case 'G':
+        digitalWrite(green, HIGH);
+        break;
+      case 'g':
+        digitalWrite(green, LOW);
+        break;
+
+      case 'L':
+        ativoLED = true;
+        break;
+      case 'l':
+        ativoLED = false;
+        break;
+
       case 'O':
         digitalWrite(blue, LOW);
         digitalWrite(red, LOW);
         digitalWrite(green, LOW);
-        delay(100);
-        break;
-      case 'L':
-        ativoLED = !ativoLED;
+        delay(20);
+        break;  
     }
   }
 
